@@ -1,0 +1,1252 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MPI Gugus Fungsi Senyawa Karbon</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --tertiary: #FFE66D;
+            --accent: #9B5DE5;
+            --bg-dark: rgba(41, 47, 54, 0.92);
+            --text-light: #F7FFF7;
+            --text-dark: #292F36;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body { height: 100%; overflow-x: hidden; overflow-y: auto; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(31, 64, 55, 0.8), rgba(153, 242, 200, 0.8)), url('asset/img/background.jpg') no-repeat center center;
+            background-size: cover;
+            overflow: hidden;
+        }
+
+        .chem-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 100 100" opacity="0.15"><path d="M30 80 L45 40 L45 20 L55 20 L55 40 L70 80 Z" stroke="white" stroke-width="3" fill="none"/><circle cx="50" cy="70" r="6" fill="white"/><circle cx="45" cy="60" r="4" fill="white"/><path d="M25 20 L25 70 Q25 80 35 80 L75 80" stroke="white" stroke-width="2" fill="none" stroke-dasharray="4"/><line x1="42" y1="50" x2="58" y2="50" stroke="white" stroke-width="2"/></svg>');
+            background-size: 120px 120px;
+            animation: moveChemBg 60s linear infinite;
+            z-index: 1;
+        }
+        @keyframes moveChemBg {
+            from { background-position: 0 0; }
+            to { background-position: 240px 240px; }
+        }
+
+        .music-btn {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: var(--tertiary);
+            border: none; border-radius: 50%;
+            width: 45px; height: 45px;
+            font-size: 22px; cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .music-btn:hover { transform: scale(1.1) rotate(15deg); }
+        .music-btn.muted { background: #ccc; opacity: 0.7; }
+
+        .page {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none; z-index: 10;
+            padding: 25px; color: var(--text-light);
+        }
+        .page.active { display: flex; }
+
+        #page-cover {
+            flex-direction: column; justify-content: center; align-items: center;
+            gap: 20px; background: rgb(137 131 131 / 89%);
+        }
+        .cover-layout {
+            display: flex; width: 85%; max-width: 900px;
+            background: var(--bg-dark); border-radius: 20px;
+            border: 4px solid var(--secondary); overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 2;
+        }
+        .cover-info {
+            flex: 1.2; padding: 30px; display: flex; flex-direction: column;
+            justify-content: center; border-right: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .photo-box {
+            width: 110px; height: 140px; background: #444;
+            border: 3px solid var(--tertiary); margin-bottom: 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: #ddd; border-radius: 8px;
+            overflow: hidden;
+        }
+        .photo-box img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        .cover-info h2 { color: var(--secondary); margin-bottom: 0px; font-size: 16px; }
+        .cover-info p { margin: 0px 0; font-size: 12px; color: #e0e0e0; }
+
+        .login-form {
+            flex: 1; padding: 30px; background: rgba(255,255,255,0.05);
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .login-form h3 { margin-bottom: 15px; color: var(--tertiary); text-align: center; }
+        .login-form input, .login-form select {
+            width: 100%; padding: 12px; margin: 8px 0;
+            border-radius: 6px; border: 2px solid #555;
+            background: #2a2a2a; color: white; font-size: 14px;
+        }
+        .login-form button {
+            width: 100%; padding: 12px; margin-top: 15px;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            color: white; font-weight: bold; border: none;
+            border-radius: 6px; cursor: pointer; font-size: 16px;
+            transition: opacity 0.2s;
+        }
+        .login-form button:hover { opacity: 0.9; }
+
+        #page-content {
+            display: grid; grid-template-columns: 20% 53% 25%;
+            gap: 15px; padding: 20px; z-index: 2; height: 100%;
+        }
+        .col {
+            background: var(--bg-dark); border-radius: 12px; padding: 15px;
+            display: flex; flex-direction: column; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .col-header {
+            font-size: 16px; font-weight: bold; padding-bottom: 8px;
+            margin-bottom: 10px; border-bottom: 2px solid var(--secondary);
+            color: var(--tertiary);
+        }
+        .scrollable-body { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .scrollable-body::-webkit-scrollbar { width: 6px; }
+        .scrollable-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+
+        .home-btn {
+            background: #52c637d9; color: white; border: none; padding: 6px 12px;
+            border-radius: 4px; cursor: pointer; margin-bottom: 12px; align-self: flex-start;
+            font-size: 13px; display: flex; align-items: center; gap: 5px;
+        }
+        .home-btn:hover { background: #555; }
+        
+        .ref-trigger-btn {
+            margin-top: 10px; width: 100%; padding: 6px; 
+            background: #52c637d9; color: white; border: none; 
+            border-radius: 4px; cursor: pointer; font-size: 12px;
+            display: flex; justify-content: center; align-items: center; gap: 5px;
+        }
+        .ref-trigger-btn:hover { background: #555; }
+
+        .nav-menu-item {
+            background: rgba(255,255,255,0.05); padding: 8px 12px;
+            border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: background 0.2s;
+        }
+        .nav-menu-item:hover { background: rgba(255,255,255,0.15); }
+
+        /* Gaya Accordion */
+        .accordion-item {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--text-dark);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .accordion-header {
+            background: #e2e8f0;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--accent);
+            user-select: none;
+        }
+        .accordion-header:hover { background: #cbd5e1; }
+        .accordion-content {
+            display: none;
+            padding: 12px;
+            border-top: 1px solid #e2e8f0;
+            background: #ffffff;
+        }
+        .accordion-item.open .accordion-content { display: block; }
+        .accordion-item.open .accordion-header { border-left-color: var(--primary); }
+        
+        /* Editor Toolbar */
+        .editor-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border: 1px solid #cbd5e1;
+            user-select: none;
+        }
+        .tool-btn {
+            padding: 3px 8px;
+            background: white;
+            border: 1px solid #94a3b8;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #334155;
+        }
+        .tool-btn:hover { background: #e2e8f0; color: #0f172a; }
+        .tool-btn.btn-save { background: #10b981; color: white; border-color: #059669; }
+        .tool-btn.btn-save:hover { background: #059669; }
+
+        .editable-sub-box {
+            padding: 10px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            min-height: 60px;
+            background: #fafafa;
+            color: var(--text-dark);
+        }
+        .editable-sub-box[contenteditable="true"] {
+            border: 2px solid #3b82f6;
+            background: #ffffff;
+        }
+
+        /* Gaya Kotak Aset Sub-sub Bab */
+        .sub-asset-container {
+            margin-top: 10px;
+            background: rgba(31, 64, 55, 0.08);
+            border: 2px dashed var(--secondary);
+            border-radius: 6px;
+            padding: 10px;
+            position: relative;
+        }
+
+        .abc-container { display: flex; justify-content: space-between; margin-top: 15px; gap: 5px; }
+        .btn-abc {
+            flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold;
+            cursor: pointer; text-align: center; color: var(--text-dark); transition: transform 0.2s;
+        }
+        .btn-abc-a { background: var(--primary); }
+        .btn-abc-b { background: var(--secondary); }
+        .btn-abc-c { background: var(--tertiary); }
+        .btn-abc:hover { transform: translateY(-2px); }
+
+        .info-box {
+            background: rgb(7 82 9 / 81%); border-left: 4px solid var(--secondary);
+            padding: 10px; border-radius: 4px; margin: 10px 0; font-size: 13px; color: #e0e0e0;
+        }
+        .content-card {
+            position: relative;
+            background: rgba(255,255,255,0.95); color: var(--text-dark);
+            padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .content-card h4 { color: #1f4037; margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px; padding-right: 30px; }
+        .content-card p { font-size: 13px; line-height: 1.5; }
+
+        /* Tombol Edit Pojok Kanan Atas Konten Utama */
+        .section-edit-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .section-edit-btn:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        .quiz-item { margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+        .quiz-item:last-child { border: none; }
+        .quiz-title { font-weight: bold; font-size: 13px; margin-bottom: 5px; }
+        .quiz-options { font-size: 12px; margin-left: 10px; }
+        .quiz-discussion {
+            margin-top: 6px; background: #e3faf2; padding: 6px;
+            border-radius: 4px; font-style: italic; font-size: 12px; color: #2b6cb0;
+        }
+
+        .grid-6-layout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+        .asset-card {
+            background: linear-gradient(135deg, var(--accent), #6247aa);
+            aspect-ratio: 1; border-radius: 8px; cursor: pointer;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 8px; font-size: 12px; font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2); transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .asset-card:hover { transform: scale(1.05); background: var(--primary); }
+        .asset-icon { font-size: 22px; margin-bottom: 5px; }
+
+        #page-references {
+            flex-direction: column; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.5); z-index: 2;
+        }
+        .ref-box {
+            background: var(--bg-dark); border: 3px solid var(--tertiary);
+            padding: 35px; border-radius: 15px; width: 75%; max-width: 700px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .ref-box h2 { color: var(--tertiary); margin-bottom: 15px; text-align: center; }
+        .ref-list { list-style-type: square; margin-left: 20px; line-height: 1.8; font-size: 14px; }
+        .ref-list li { margin-bottom: 8px; }
+
+        /* MODAL JENDELA MELAYANG & LIGHTBOX */
+        .modal-mask {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
+            z-index: 500; justify-content: center; align-items: center; transition: all 0.3s ease;
+        }
+        .modal-window {
+            width: 85%; max-width: 1000px; aspect-ratio: 16/9; background: var(--bg-dark); border: 3px solid var(--secondary); border-radius: 12px;
+            position: relative; padding: 20px; display: flex; flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); animation: zoomIn 0.3s ease;
+            transition: all 0.3s ease;
+        }
+        .modal-window.fullscreen {
+            width: 98% !important; height: 96% !important; max-width: none !important; aspect-ratio: auto !important;
+        }
+        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .modal-controls {
+            position: absolute; top: 12px; right: 15px; display: flex; gap: 8px; z-index: 600;
+        }
+        .modal-ctrl-btn {
+            border: none; border-radius: 6px; height: 30px; padding: 0 10px;
+            cursor: pointer; font-weight: bold; font-size: 12px; display: flex; 
+            justify-content: center; align-items: center; color: white; transition: background 0.2s;
+        }
+        .modal-btn-maximize { background: #3b82f6; }
+        .modal-btn-maximize:hover { background: #2563eb; }
+        .modal-btn-close { background: #e53e3e; }
+        .modal-btn-close:hover { background: #c53030; }
+
+        .modal-header-title { color: var(--tertiary); margin-bottom: 10px; font-size: 16px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 8px; padding-right: 150px; font-weight: bold; }
+        .modal-body-frame { width: 100%; flex: 1; border: none; background: #f0f2f5; border-radius: 6px; overflow: auto; }
+
+        .asset-inner-view {
+            width: 100%; height: 100%; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: #333; text-align: center; padding: 20px;
+        }
+        .asset-inner-view .big-icon { font-size: 70px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+
+        .validation-msg {
+            background: rgba(229, 62, 62, 0.9); color: white; padding: 8px 12px;
+            border-radius: 6px; font-size: 13px; margin-top: 8px; display: none; text-align: center;
+        }
+
+        .infografis-container-box {
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: rgba(31, 64, 55, 0.15);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(31, 64, 55, 0.2);
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        .infografis-container-box img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+            display: block;
+        }
+
+        .zoom-infografis-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            z-index: 20;
+            background: rgba(41, 47, 54, 0.85);
+            color: #F7FFF7;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        .zoom-infografis-btn:hover {
+            background: #4ECDC4;
+            color: #292F36;
+            transform: scale(1.05);
+        }
+
+        .infografis-lightbox {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            padding-top: 30px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+        .infografis-lightbox-content {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 4px;
+            animation: zoomEffect 0.25s ease;
+        }
+        @keyframes zoomEffect {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .close-infografis-lightbox {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            color: #fff;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close-infografis-lightbox:hover { color: #FF6B6B; }
+
+        /* ==========================================================================
+           PROTEKSI FORMAT PASTE MS WORD (MENGALAHKAN RESET TAILWIND PREFLIGHT)
+           ========================================================================== */
+        .rich-editable-box, .editable-sub-box {
+            overflow-x: auto !important;
+            line-height: 1.6 !important;
+            word-wrap: break-word !important;
+        }
+        /* Penataan paksa tabel yang ditempel dari Word */
+        .rich-editable-box table, .editable-sub-box table {
+            border-collapse: collapse !important;
+            border-width: 1px !important;
+            border-style: solid !important;
+            border-color: #94a3b8 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 15px 0 !important;
+            background-color: #ffffff !important;
+            display: table !important;
+            color: #292F36 !important;
+        }
+        .rich-editable-box table th, .rich-editable-box table td,
+        .editable-sub-box table th, .editable-sub-box table td {
+            border: 1px solid #94a3b8 !important;
+            padding: 8px 12px !important;
+            min-width: 40px !important;
+            text-align: left !important;
+        }
+        .rich-editable-box table th, .editable-sub-box table th {
+            background-color: #f1f5f9 !important;
+            font-weight: bold !important;
+        }
+        /* Penataan paksa List Bullet & Numbering dari Word */
+        .rich-editable-box ul, .editable-sub-box ul {
+            list-style-type: disc !important;
+            list-style-position: outside !important;
+            margin-left: 25px !important;
+            margin-top: 8px !important;
+            margin-bottom: 8px !important;
+            padding-left: 0 !important;
+            display: block !important;
+        }
+        .rich-editable-box ol, .editable-sub-box ol {
+            list-style-type: decimal !important;
+            list-style-position: outside !important;
+            margin-left: 25px !important;
+            margin-top: 8px !important;
+            margin-bottom: 8px !important;
+            padding-left: 0 !important;
+            display: block !important;
+        }
+        .rich-editable-box li, .editable-sub-box li {
+            display: list-item !important;
+            margin-bottom: 4px !important;
+            list-style: inherit !important;
+        }
+        /* Penataan teks paragraf dan heading */
+        .rich-editable-box p, .editable-sub-box p {
+            margin-bottom: 8px !important;
+            margin-top: 0 !important;
+        }
+        .rich-editable-box h1, .editable-sub-box h1 { font-size: 2em !important; font-weight: bold !important; margin: 12px 0 !important; display: block !important;}
+        .rich-editable-box h2, .editable-sub-box h2 { font-size: 1.5em !important; font-weight: bold !important; margin: 12px 0 !important; display: block !important;}
+        .rich-editable-box h3, .editable-sub-box h3 { font-size: 1.17em !important; font-weight: bold !important; margin: 12px 0 !important; display: block !important;}
+
+        @media (max-width: 850px) {
+            html, body { overflow-y: auto; height: auto; }
+            .app-container { width: 100%; height: auto; min-height: 100%; display: block; }
+            .page { position: relative; height: auto; display: none; padding: 15px; }
+            .page.active { display: flex; flex-direction: column; }
+            .cover-layout { flex-direction: column; width: 100%; }
+            .cover-info { border-right: none; border-bottom: 2px solid rgba(255,255,255,0.1); }
+            #page-content { grid-template-columns: 1fr; gap: 15px; height: auto; }
+            .col { height: 450px; }
+            .modal-window { width: 95%; aspect-ratio: auto; height: 80%; }
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            z-index: 9999;
+        }
+        @media (max-width: 768px){
+            .chem-bg{ animation:none; }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="app-container">
+  
+   <audio id="bgMusic" src="asset/audio/bgm.mp3" loop></audio>
+
+   <div class="chem-bg"></div>
+   <button class="music-btn" id="musicToggleBtn" onclick="handleMusicToggle()">🎵</button> 
+   
+   <div id="page-cover" class="page active">
+    <div class="cover-layout">
+     <div class="cover-info text-center flex flex-col items-center">
+      <center>
+        <div class="photo-box mx-auto">
+            <img src="asset/img/profil.png" alt="Foto Guru" onerror="this.style.display='none'; this.parentNode.innerText='Tempat Foto'">
+        </div>
+      <p>Senyawa Karbon dan Turunannya</p>
+      <h2 id="viewTopicName">Gugus Fungsi Senyawa Karbon</h2>
+      <p id="viewAuthorName">Dedi Erlangga, S. Pd.</p>
+      <p id="viewSchoolName">Fase F . Kimia . Kurikulum Merdeka</p>
+     </div>
+     <div class="login-form">
+      <h3>Login Siswa</h3>
+      <label for="inputName" style="font-size: 12px; margin-bottom: -4px;">Nama Lengkap Siswa:</label> 
+      <input type="text" id="inputName" placeholder="Ketik nama Anda di sini..." required> 
+      <label for="selectClass" style="font-size: 12px; margin-bottom: -4px; margin-top: 5px;">Pilih Kelas:</label> 
+      <select id="selectClass" required> 
+        <option value="" disabled selected>-- Pilih Kelas Anda --</option> 
+        <option value="XA">Kelas XA</option> 
+        <option value="XB">Kelas XB</option> 
+        <option value="XC">Kelas XC</option> 
+        <option value="XD">Kelas XD</option> 
+        <option value="XI">Kelas XI</option> 
+        <option value="XII">Kelas XII</option> 
+      </select> 
+      <button type="button" onclick="validateAndLogin()">Mulai Belajar Sekarang 🚀</button>
+      <div class="validation-msg" id="validationMsg"></div>
+     </div>
+    </div>
+   </div>
+
+   <div id="page-content" class="page">
+    <div class="col">
+     <button class="home-btn" onclick="switchPage('page-cover')">🏠 Menu Utama</button>
+     <div class="col-header">Dedi Erlangga, S. Pd.</div>
+     <div class="scrollable-body">
+      <div style="font-size: 13px; margin-bottom: 10px; font-weight: bold; color: var(--secondary);">
+       Fase F - <span id="currentTopicLabel" style="color:white; font-weight:normal;">Kimia</span>
+      </div>
+      <div class="nav-menu-item" style="font-weight: normal; background: rgba(78,205,196,0.2);" onclick="scrollToSection('section-tujuan')">
+       🎯 Tujuan Pembelajaran
+      </div>
+      <div class="nav-menu-item" style="font-weight: normal; background: rgba(78,205,196,0.2);" onclick="scrollToSection('section-materi')">
+       📖 Pendahuluan
+      </div>
+      <div style="margin: 10px 0 5px 0; font-size: 12px; color: #aaa;">Sub Pokok Bahasan</div>
+      <div id="navDropdowns"></div>
+      <div class="nav-menu-item" style="margin-top: 10px;" onclick="scrollToSection('section-latihan')">
+       📝 Latihan Soal
+      </div>
+      <div class="nav-menu-item" onclick="launchInternalAsset(7, 1, '📋 Evaluasi Akhir')">
+       📋 Evaluasi Akhir
+      </div>
+      <div style="margin-top: 15px; font-size: 11px; color:#aaa;">Pintasan Web Eksternal:</div>
+      <div class="abc-container">
+       <button class="btn-abc btn-abc-a" onclick="launchWebWindow('https://id.wikipedia.org/wiki/Asam')">A</button> 
+       <button class="btn-abc btn-abc-b" onclick="launchWebWindow('https://phet.colorado.edu/sims/html/acid-base-solutions/latest/acid-base-solutions_all.html')">B</button> 
+       <button class="btn-abc btn-abc-c" onclick="launchWebWindow('https://www.google.com')">C</button>
+      </div>
+     </div>
+     <button onclick="switchPage('page-references')" class="ref-trigger-btn">➡️ Lihat Sumber/Referensi</button>
+    </div>
+
+    <div class="col">
+     <div class="col-header">Gugus Fungsi Senyawa Karbon</div>
+     <div class="scrollable-body" id="middlePanelScroll">
+      
+      <div id="section-evaluasi" class="content-card" style="border-left: 4px solid var(--primary);">
+       <h4>📋 Selamat Datang</h4>
+       <p style="font-size: 12px;">Hallo <strong id="studentUserLabel">Siswa</strong>, Anda terdeteksi masuk sebagai siswa di kelas <strong id="studentClassLabel">XA</strong>. Siap jadi lebih pintar? Ayo klik materi di bawah ini dan mulai belajar!</p>
+      </div>
+
+      <div id="section-tujuan" class="content-card">
+       <button class="section-edit-btn" onclick="openSectionEditor('tujuan')">⚙️</button>
+       <h4>🎯 Tujuan Pembelajaran</h4>
+       
+       <div id="editor-tools-tujuan" class="editor-tools" style="display:none;">
+            <button class="tool-btn btn-save" onmousedown="event.preventDefault(); closeSectionEditor('tujuan')">💾 Simpan</button>
+            <span style="border-left: 1px solid #cbd5e1; margin: 0 4px;"></span>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatSectionDoc('bold')"><b>B</b></button>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatSectionDoc('italic')"><i>I</i></button>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatSectionDoc('underline')"><u>U</u></button>
+            <span style="border-left: 1px solid #cbd5e1; margin: 0 4px;"></span>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatSectionDoc('insertUnorderedList')">• List</button>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatSectionDoc('insertOrderedList')">1. List</button>
+       </div>
+
+       <div id="box-editable-tujuan" class="outline-none rich-editable-box" contenteditable="false">
+           <p id="txtTujuan">Melalui media interaktif ini, Peserta Didik <span class="user-class-lbl">X</span> diharapkan <strong>mampu menjelaskan senyawa karbon dan makromolekul serta penerapannya dalam kehidupan sehari-hari.</strong></p>
+    	   <div style="font-size: 12px; color:black; margin-bottom: 15px; margin-top: 10px;">
+    	     <strong>Gugus fungsi</strong> adalah atom atau sekelompok atom yang menentukan sifat kimia dan fisik yang khas dari suatu senyawa.<br /><strong>Ringkasan Gugus Fungsi Turunan Alkana</strong><br />Secara umum, senyawa turunan alkana terbentuk ketika satu atau lebih atom H pada alkana digantikan oleh gugus fungsi tertentu.
+           </div>
+       </div>
+
+       <div class="infografis-container-box">
+         <button class="zoom-infografis-btn" onclick="openInfografisLightbox()">🔍 Perbesar Gambar</button>
+         <center>
+           <img id="infografisGugusFungsi" src="asset/img/infografis_gugus_fungsi.png" alt="Infografis Gugus Fungsi Senyawa Karbon" onerror="this.style.display='none'; this.parentElement.parentElement.style.display='none';">
+         </center>
+       </div>
+       <div class="info-box">
+        <strong>Informasi Penting :</strong> Senyawa karbon merupakan inti dari kimia organik sekaligus dasar kehidupan di bumi. 💡💡💡
+       </div>
+      </div>
+      
+      <div id="section-materi" class="content-card">
+       <button class="section-edit-btn" onclick="openSectionEditor('materi')">♻️</button>
+       <h4>📖 Pendahuluan</h4>
+       
+       <div id="editor-tools-materi" class="editor-tools" style="display:none;">
+            <button class="tool-btn btn-save" onmousedown="event.preventDefault(); closeSectionEditor('materi')">💾 Simpan</button>
+       </div>
+
+       <center>
+         <img id="materiImage" src="asset/img/materi_default.png" alt="Ilustrasi Materi" style="max-width: 100%; border-radius: 8px; margin-bottom: 12px; display: none;" onerror="this.style.display='none'">
+       </center>
+
+       <div id="box-editable-materi" class="outline-none rich-editable-box" contenteditable="false" style="font-size: 12px; margin-bottom: 15px; text-align: justify;">
+        Gugus fungsi adalah kelompok dari satu atau lebih atom-atom dari sifat-sifat kimia yang khas, tidak peduli apa yang melekat pada mereka. Atom-atom gugus fungsi tersebut saling terkait satu sama lain dan dengan molekul lainnya melalui ikatan kovalen. Menggabungkan nama-nama gugus fungsi dengan nama-nama alkana induk menghasilkan apa yang disebut sebagai tata nama sistematis untuk penamaan senyawa organik.
+       </div>
+      </div>
+
+      <div id="editableSubSubSectionsContainer"></div>
+
+      <div id="section-latihan" class="content-card">
+       <button class="section-edit-btn" onclick="openSectionEditor('latihan')">📌</button>
+       <h4>📝 Latihan Soal &amp; Pembahasan</h4>
+       
+       <div id="editor-tools-latihan" class="editor-tools" style="display:none;">
+            <button class="tool-btn btn-save" onmousedown="event.preventDefault(); closeSectionEditor('latihan')">💾 Simpan</button>
+            <span style="border-left: 1px solid #cbd5e1; margin: 0 4px;"></span>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatSectionDoc('bold')"><b>B</b></button>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatSectionDoc('italic')"><i>I</i></button>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatSectionDoc('underline')"><u>U</u></button>
+            <span style="border-left: 1px solid #cbd5e1; margin: 0 4px;"></span>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatSectionDoc('insertUnorderedList')">• List</button>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatSectionDoc('insertOrderedList')">1. List</button>
+       </div>
+
+       <div id="box-editable-latihan" class="outline-none rich-editable-box" contenteditable="false">
+           <div class="quiz-item">
+            <div class="quiz-title">1. [Pilihan Ganda] Zat yang bertindak sebagai donor proton menurut teori Bronsted-Lowry disebut...</div>
+            <div class="quiz-options">A. Basa Konjugasi &nbsp;&nbsp;B. Asam &nbsp;&nbsp;C. Basa &nbsp;&nbsp;D. Garam</div>
+            <div class="quiz-discussion">Pembahasan: Menurut Bronsted-Lowry, asam didefinisikan sebagai spesi donor proton (H+).</div>
+           </div>
+       </div>
+      </div>
+
+     </div>
+    </div>
+
+    <div class="col">
+     <div class="col-header">Media Interaktif</div>
+     <label for="selectSubDropdown" style="font-size: 11px; color: #ccc;">Pilih Judul Sub Pokok Bahasan :</label> 
+     <select id="selectSubDropdown" style="width: 100%; padding: 8px; margin: 5px 0 12px 0; border-radius: 4px; background: #333; color: white;" onchange="handleSubDropdownChange()"> 
+       <option value="1">Alkohol</option> 
+       <option value="2">Eter</option> 
+       <option value="3">Aldehid</option> 
+       <option value="4">Keton</option> 
+       <option value="5">Asam Karboksilat</option> 
+       <option value="6">Ester</option> 
+       <option value="7">Halo Alkana</option>
+     </select>
+     <p style="font-size: 12px; margin-bottom: 8px; color:#e0e0e0;">Silakan klik kotak dibawah ini untuk menampilkan :</p>
+     <div class="scrollable-body">
+      <div class="grid-6-layout" id="assetGridContainer"></div>
+     </div>
+    </div>
+   </div>
+
+   <div id="page-references" class="page">
+    <div class="ref-box">
+     <h2>Daftar Sumber &amp; Referensi</h2>
+     <hr style="margin: 15px 0; border-color: var(--secondary); opacity: 0.5;">
+     <ul class="ref-list">
+      <li>Sudarmono, Unggul. (2016). <em>Kimia untuk SMA/MA Kelas X</em>. Jakarta: Penerbit Erlangga.</li>
+      <li>Chang, Raymond. (2010). <em>Chemistry 10th Edition</em>. New York: McGraw-Hill.</li>
+     </ul>
+     <button onclick="switchPage('page-content')" style="margin-top: 25px; width: 100%; padding: 12px; background: var(--secondary); color: var(--text-dark); border: none; font-weight: bold; border-radius: 6px; cursor: pointer;">⬅️ Kembali ke Halaman Pembelajaran</button>
+    </div>
+   </div>
+
+   <div id="globalModalMask" class="modal-mask">
+    <div class="modal-window" id="modalWindow">
+     <div class="modal-controls">
+         <button class="modal-ctrl-btn modal-btn-maximize" onclick="toggleModalSize()">🗖 Fullscreen</button>
+         <button class="modal-ctrl-btn modal-btn-close" onclick="closeGlobalModal()">X</button>
+     </div>
+     <h3 id="modalHeaderTitle" class="modal-header-title">Judul Jendela Melayang</h3>
+     <iframe id="modalWebIframe" class="modal-body-frame" style="display:none;" src=""></iframe>
+     <div id="modalInternalAssetContent" class="modal-body-frame" style="display:none;"></div>
+    </div>
+   </div>
+
+   <div id="infografisLightbox" class="infografis-lightbox" onclick="closeInfografisLightbox()">
+    <span class="close-infografis-lightbox">&times;</span>
+    <div id="lightboxMediaContainer" class="w-full h-full flex items-center justify-center p-4" onclick="event.stopPropagation()">
+        <img class="infografis-lightbox-content hidden" id="imgInfografisTarget">
+        <video id="vidLightboxTarget" controls class="hidden max-w-[90%] max-h-[85vh] object-contain rounded"></video>
+        <iframe id="frameLightboxTarget" class="hidden w-[95%] h-[85vh] bg-white rounded border-none"></iframe>
+    </div>
+   </div>
+
+  </div>
+
+  <script>
+    const defaultConfig = {
+        topic_name: "GUGUS FUNGSI SENYAWA KARBON",
+        author_name: "Dedi Erlangga, S. Pd.",
+        school_name: "SMAN 1 Kapuas Hulu",
+        background_color: "#1f4037",
+        surface_color: "#292f36",
+        text_color: "#F7FFF7",
+        primary_action: "#4ECDC4",
+        secondary_action: "#9B5DE5",
+        font_family: "Segoe UI",
+        font_size: 16
+    };
+
+    function applyConfig(config) {
+        document.getElementById('viewTopicName').textContent = config.topic_name;
+        document.getElementById('viewAuthorName').innerHTML = `Oleh ${config.author_name}`;
+        document.getElementById('viewSchoolName').innerHTML = `Fase F . Kimia .  ${config.school_name}`;
+        document.body.style.fontFamily = `${config.font_family}, Segoe UI, sans-serif`;
+        document.body.style.fontSize = `${config.font_size}px`;
+    }
+
+    let currentActivePage = 'page-cover';
+    let isAudioPlaying = false;
+    
+    // Objek State Global untuk Melacak Ketersediaan File Riil per Accordion
+    const assetStates = {}; 
+
+    const navContainer = document.getElementById('navDropdowns');
+    const editableSectionsContainer = document.getElementById('editableSubSubSectionsContainer');
+
+    const listSubBahasan = ["Alkohol", "Eter", "Aldehid", "Keton", "Asam Karboksilat", "Ester", "Halo Alkana"];
+    const subMateriNames = ["Pengertian", "Struktur dan Tata Nama", "Sifat Fisika dan Kimia", "Reaksi dan Isomer", "Kegunaan dan Dampak", "Contoh Soal"];
+
+    const fragment = document.createDocumentFragment();
+	
+    for (let i = 0; i < listSubBahasan.length; i++) {
+        const indexSatu = i + 1;
+        const namaSub = listSubBahasan[i];
+    
+        const navItem = document.createElement('div');
+        navItem.className = "nav-menu-item";
+        navItem.innerText = `${indexSatu}. ${namaSub}`;
+        navItem.onclick = () => scrollToSection(`section-sub-bahasan-${indexSatu}`);
+        navContainer.appendChild(navItem);
+
+        const sectionWrapper = document.createElement('div');
+        sectionWrapper.id = `section-sub-bahasan-${indexSatu}`;
+        sectionWrapper.style.transform = "translate3d(0,0,0)";
+        sectionWrapper.style.marginBottom = "20px";
+
+        const sectionHeader = document.createElement('h4');
+        sectionHeader.className = "text-yellow-300 font-bold text-base mb-2";
+        sectionHeader.innerText = `${namaSub}`;
+        sectionWrapper.appendChild(sectionHeader);
+
+        for (let j = 1; j <= 6; j++) {
+            createAccordionBox(sectionWrapper, indexSatu, j, subMateriNames[j-1], listSubBahasan[i]);
+        }
+        fragment.appendChild(sectionWrapper);
+    }
+    editableSectionsContainer.appendChild(fragment);
+
+    function createAccordionBox(container, bab, sub, jenisMateri, namaSubBahasan) {
+        const accItem = document.createElement('div');
+        accItem.className = "accordion-item";
+        accItem.id = `acc-item-${bab}-${sub}`;
+        
+        const accHeader = document.createElement('div');
+        accHeader.className = "accordion-header";
+        accHeader.innerHTML = `
+            <span style="flex:1;" onclick="toggleAccordionItem('${bab}', '${sub}')">${jenisMateri}</span>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <span title="Edit" style="color:#2563eb; cursor:pointer;" onclick="enableAccordionEdit(event, ${bab}, ${sub})">❄️</span>
+                <span style="font-size:11px;" onclick="toggleAccordionItem('${bab}', '${sub}')">▼</span>
+            </div>
+        `;
+
+        const accContent = document.createElement('div');
+        accContent.className = "accordion-content";
+
+        const toolsDiv = document.createElement('div');
+        toolsDiv.className = "editor-tools";
+        toolsDiv.id = `tools-editor-${bab}-${sub}`;
+        toolsDiv.style.display = "none";
+        toolsDiv.innerHTML = `
+            <button class="tool-btn btn-save" onclick="disableAccordionEdit(${bab}, ${sub})">💾 Simpan</button>
+            <span style="border-left: 1px solid #cbd5e1; margin: 0 4px;"></span>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatDoc('bold')"><b>B</b></button>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatDoc('italic')"><i>I</i></button>
+            <button class="tool-btn" onmousedown="event.preventDefault(); formatDoc('underline')"><u>U</u></button>
+        `;
+
+        const editableBox = document.createElement('div');
+        const cachedContent = localStorage.getItem(`saved-acc-${bab}-${sub}`);
+        editableBox.className = "editable-sub-box";
+        editableBox.id = `box-editable-${bab}-${sub}`;
+        editableBox.setAttribute("contenteditable", "false");
+        editableBox.innerHTML = cachedContent ? cachedContent : `Silakan lengkapi pembahasan materi <b>${jenisMateri} ${namaSubBahasan}</b> di sini.`;
+
+        const folderMap = { 1: "alkohol", 2: "eter", 3: "aldehid", 4: "keton", 5: "asam_karboksilat", 6: "ester", 7: "halo_alkana" };
+        const materiMap = { 1: "pengertian", 2: "struktur", 3: "sifat", 4: "reaksi", 5: "kegunaan", 6: "contoh_soal" };
+        const assetPath = `asset/accordion/${folderMap[bab]}/${materiMap[sub]}`;
+
+        // Kontainer Utama Aset - Mulai dalam keadaan HIDDEN total
+        const assetContainer = document.createElement('div');
+        assetContainer.className = "sub-asset-container hidden"; 
+        assetContainer.id = `asset-container-${bab}-${sub}`;
+        assetContainer.innerHTML = `
+            <div class="relative w-full rounded overflow-hidden flex flex-col gap-2">
+                <div id="wrapper-img-${bab}-${sub}" class="relative hidden">
+                    <img id="sub-img-${bab}-${sub}" src="${assetPath}/gambar.png" class="hidden w-full h-auto rounded shadow-sm" onload="onSubAssetLoaded('${bab}', '${sub}', 'img')" onerror="onSubAssetError('${bab}', '${sub}', 'img')">
+                    <button id="zoom-btn-${bab}-${sub}" class="hidden absolute top-2 right-2 bg-slate-800/80 hover:bg-teal-500 text-white hover:text-slate-900 font-bold p-1 px-2 rounded text-xs transition" onclick="zoomSubAsset('${bab}', '${sub}', 'img')">🔍 Perbesar Gambar</button>
+                </div>
+                <div id="wrapper-vid-${bab}-${sub}" class="relative hidden">
+                    <video id="sub-vid-${bab}-${sub}" controls class="hidden w-full max-h-[300px] rounded shadow-sm" onloadedmetadata="onSubAssetLoaded('${bab}', '${sub}', 'vid')" onerror="onSubAssetError('${bab}', '${sub}', 'vid')">
+                        <source src="${assetPath}/video.mp4" type="video/mp4">
+                    </video>
+                    <button id="zoom-vid-btn-${bab}-${sub}" class="hidden absolute top-2 right-2 bg-slate-800/80 hover:bg-teal-500 text-white hover:text-slate-900 font-bold p-1 px-2 rounded text-xs transition" onclick="zoomSubAsset('${bab}', '${sub}', 'vid')">🔍 Perbesar Video</button>
+                </div>
+                <div id="wrapper-frame-${bab}-${sub}" class="relative hidden">
+                    <iframe id="sub-frame-${bab}-${sub}" src="${assetPath}/simulasi.html" class="hidden w-full h-[250px] rounded border border-slate-300" onload="onIframeLoadTrigger('${bab}', '${sub}')" onerror="onSubAssetError('${bab}', '${sub}', 'frame')"></iframe>
+                    <button id="zoom-frame-btn-${bab}-${sub}" class="hidden absolute top-2 right-2 bg-slate-800/80 hover:bg-teal-500 text-white hover:text-slate-900 font-bold p-1 px-2 rounded text-xs transition" onclick="zoomSubAsset('${bab}', '${sub}', 'frame')">🔍 Perbesar Simulasi</button>
+                </div>
+            </div>
+        `;
+
+        accContent.appendChild(toolsDiv);
+        accContent.appendChild(editableBox);
+        accContent.appendChild(assetContainer);
+        accItem.appendChild(accHeader);
+        accItem.appendChild(accContent);
+        container.appendChild(accItem);
+    }
+
+    function initAssetState(bab, sub) {
+        const key = `${bab}-${sub}`;
+        if (!assetStates[key]) {
+            assetStates[key] = { img: false, vid: false, frame: false };
+        }
+        return assetStates[key];
+    }
+
+    // Dipanggil saat aset gambar/video sukses terpanggil
+    function onSubAssetLoaded(bab, sub, type) {
+        const state = initAssetState(bab, sub);
+        if (type === 'img') {
+            const img = document.getElementById(`sub-img-${bab}-${sub}`);
+            if (img && img.naturalWidth > 0) state.img = true;
+        } else if (type === 'vid') {
+            state.vid = true;
+        }
+        renderAssetExclusivity(bab, sub);
+    }
+
+    // Dipanggil saat aset gagal dimuat (404 / file tidak ditemukan)
+    function onSubAssetError(bab, sub, type) {
+        const state = initAssetState(bab, sub);
+        state[type] = false;
+        renderAssetExclusivity(bab, sub);
+    }
+
+    // Penanganan khusus Iframe (index/simulasi.html) untuk mencegah false-positive saat offline/404
+    function onIframeLoadTrigger(bab, sub) {
+        const state = initAssetState(bab, sub);
+        const frame = document.getElementById(`sub-frame-${bab}-${sub}`);
+        
+        try {
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            const title = doc.title ? doc.title.toLowerCase() : "";
+            const text = doc.body ? doc.body.innerText.toLowerCase() : "";
+            if (title.includes("404") || title.includes("not found") || text.includes("error 404") || text.includes("tidak ditemukan") || text.trim() === "") {
+                state.frame = false;
+            } else {
+                state.frame = true;
+            }
+        } catch(e) {
+            state.frame = false;
+        }
+        renderAssetExclusivity(bab, sub);
+    }
+
+    // PUSAT ATURAN EKSKLUSIVITAS & VISIBILITAS KOTAK ACCORDION
+    function renderAssetExclusivity(bab, sub) {
+        const key = `${bab}-${sub}`;
+        const state = assetStates[key] || { img: false, vid: false, frame: false };
+
+        const container = document.getElementById(`asset-container-${bab}-${sub}`);
+        const wImg = document.getElementById(`wrapper-img-${bab}-${sub}`);
+        const wVid = document.getElementById(`wrapper-vid-${bab}-${sub}`);
+        const wFrame = document.getElementById(`wrapper-frame-${bab}-${sub}`);
+
+        const elImg = document.getElementById(`sub-img-${bab}-${sub}`);
+        const elVid = document.getElementById(`sub-vid-${bab}-${sub}`);
+        const elFrame = document.getElementById(`sub-frame-${bab}-${sub}`);
+
+        const zImg = document.getElementById(`zoom-btn-${bab}-${sub}`);
+        const zVid = document.getElementById(`zoom-vid-btn-${bab}-${sub}`);
+        const zFrame = document.getElementById(`zoom-frame-btn-${bab}-${sub}`);
+
+        if(wImg) wImg.classList.add('hidden'); if(elImg) elImg.classList.add('hidden'); if(zImg) zImg.classList.add('hidden');
+        if(wVid) wVid.classList.add('hidden'); if(elVid) elVid.classList.add('hidden'); if(zVid) zVid.classList.add('hidden');
+        if(wFrame) wFrame.classList.add('hidden'); if(elFrame) elFrame.classList.add('hidden'); if(zFrame) zFrame.classList.add('hidden');
+
+        if (state.img) {
+            container?.classList.remove('hidden');
+            wImg?.classList.remove('hidden'); elImg?.classList.remove('hidden'); zImg?.classList.remove('hidden');
+            return;
+        }
+        
+        if (state.vid) {
+            container?.classList.remove('hidden');
+            wVid?.classList.remove('hidden'); elVid?.classList.remove('hidden'); zVid?.classList.remove('hidden');
+            return;
+        }
+
+        if (state.frame) {
+            container?.classList.remove('hidden');
+            wFrame?.classList.remove('hidden'); elFrame?.classList.remove('hidden'); zFrame?.classList.remove('hidden');
+            return;
+        }
+
+        container?.classList.add('hidden');
+    }
+
+    async function probeAllAssetsRemote() {
+        if (window.location.protocol === 'file:') return; 
+        const folderMap = { 1: "alkohol", 2: "eter", 3: "aldehid", 4: "keton", 5: "asam_karboksilat", 6: "ester", 7: "halo_alkana" };
+        const materiMap = { 1: "pengertian", 2: "struktur", 3: "sifat", 4: "reaksi", 5: "kegunaan", 6: "contoh_soal" };
+
+        for (let bab = 1; bab <= 7; bab++) {
+            for (let sub = 1; sub <= 6; sub++) {
+                const basePath = `asset/accordion/${folderMap[bab]}/${materiMap[sub]}`;
+                const key = `${bab}-${sub}`;
+                initAssetState(bab, sub);
+
+                try {
+                    const [resImg, resVid, resFrame] = await Promise.all([
+                        fetch(`${basePath}/gambar.png`, { method: 'HEAD' }).catch(() => ({ ok: false })),
+                        fetch(`${basePath}/video.mp4`, { method: 'HEAD' }).catch(() => ({ ok: false })),
+                        fetch(`${basePath}/simulasi.html`, { method: 'HEAD' }).catch(() => ({ ok: false }))
+                    ]);
+                    assetStates[key].img = resImg.ok;
+                    assetStates[key].vid = resVid.ok;
+                    assetStates[key].frame = resFrame.ok;
+                    renderAssetExclusivity(bab, sub);
+                } catch (e) {}
+            }
+        }
+    }
+
+    function toggleAccordionItem(bab, sub) {
+        const item = document.getElementById(`acc-item-${bab}-${sub}`);
+        if(item) {
+            item.classList.toggle('open');
+            if (item.classList.contains('open')) {
+                renderAssetExclusivity(bab, sub);
+            }
+        }
+    }
+
+    function zoomSubAsset(bab, sub, type) {
+        const lightbox = document.getElementById("infografisLightbox");
+        const lightboxImg = document.getElementById("imgInfografisTarget");
+        const lightboxVid = document.getElementById("vidLightboxTarget");
+        const lightboxFrame = document.getElementById("frameLightboxTarget");
+        
+        lightboxImg.classList.add('hidden');
+        lightboxVid.classList.add('hidden');
+        lightboxFrame.classList.add('hidden');
+        lightboxVid.pause(); lightboxVid.src = ""; lightboxFrame.src = "";
+
+        lightbox.style.display = "flex";
+        
+        if (type === 'img') {
+            lightboxImg.src = document.getElementById(`sub-img-${bab}-${sub}`).src;
+            lightboxImg.classList.remove('hidden');
+        } else if (type === 'vid') {
+            lightboxVid.src = document.getElementById(`sub-vid-${bab}-${sub}`).querySelector('source').src;
+            lightboxVid.classList.remove('hidden');
+            lightboxVid.load(); lightboxVid.play();
+        } else if (type === 'frame') {
+            lightboxFrame.src = document.getElementById(`sub-frame-${bab}-${sub}`).src;
+            lightboxFrame.classList.remove('hidden');
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTujuan = localStorage.getItem('saved-section-tujuan');
+        if (savedTujuan) document.getElementById('box-editable-tujuan').innerHTML = savedTujuan;
+
+        const savedMateri = localStorage.getItem('saved-section-materi');
+        if (savedMateri) document.getElementById('box-editable-materi').innerHTML = savedMateri;
+
+        // Memuat data simpanan latihan soal dari Local Storage jika tersedia
+        const savedLatihan = localStorage.getItem('saved-section-latihan');
+        if (savedLatihan) document.getElementById('box-editable-latihan').innerHTML = savedLatihan;
+
+        applyConfig(defaultConfig);
+        probeAllAssetsRemote();
+        
+        setTimeout(() => {
+            for(let b=1; b<=7; b++) {
+                for(let s=1; s<=6; s++) renderAssetExclusivity(b, s);
+            }
+        }, 300);
+    });
+
+    window.openSectionEditor = function(type) {
+        const targetBox = document.getElementById(`box-editable-${type}`);
+        const toolsPanel = document.getElementById(`editor-tools-${type}`);
+        targetBox.setAttribute("contenteditable", "true");
+        targetBox.style.border = "2px solid #3b82f6";
+        targetBox.style.padding = "10px";
+        targetBox.style.background = "#ffffff";
+        targetBox.style.color = "#292F36";
+        if(toolsPanel) toolsPanel.style.display = "flex";
+        targetBox.focus();
+    }
+
+    window.closeSectionEditor = function(type) {
+        const targetBox = document.getElementById(`box-editable-${type}`);
+        const toolsPanel = document.getElementById(`editor-tools-${type}`);
+        targetBox.setAttribute("contenteditable", "false");
+        targetBox.style.border = "none";
+        targetBox.style.padding = "0px";
+        targetBox.style.background = "transparent";
+        targetBox.style.color = "inherit";
+        if(toolsPanel) toolsPanel.style.display = "none";
+        localStorage.setItem(`saved-section-${type}`, targetBox.innerHTML);
+        showToast(`Perubahan berhasil disimpan!`);
+    }
+
+    window.formatSectionDoc = function(cmd) { document.execCommand(cmd, false, null); }
+
+    window.enableAccordionEdit = function(event, bab, sub) {
+        event.stopPropagation();
+        const item = document.getElementById(`acc-item-${bab}-${sub}`);
+        if(!item.classList.contains('open')) item.classList.add('open');
+        const box = document.getElementById(`box-editable-${bab}-${sub}`);
+        const tools = document.getElementById(`tools-editor-${bab}-${sub}`);
+        box.setAttribute("contenteditable", "true");
+        tools.style.display = "flex";
+        box.focus();
+    }
+
+    window.disableAccordionEdit = function(bab, sub) {
+        const box = document.getElementById(`box-editable-${bab}-${sub}`);
+        const tools = document.getElementById(`tools-editor-${bab}-${sub}`);
+        box.setAttribute("contenteditable", "false");
+        tools.style.display = "none";
+        localStorage.setItem(`saved-acc-${bab}-${sub}`, box.innerHTML);
+        showToast(`Konten Sub-sub Bab berhasil disimpan!`);
+    }
+
+    window.formatDoc = function(cmd) { document.execCommand(cmd, false, null); }
+
+    function handleMusicToggle() {
+        const btn = document.getElementById('musicToggleBtn');
+        const audio = document.getElementById('bgMusic');
+        if (isAudioPlaying) {
+            isAudioPlaying = false; audio.pause();
+            btn.classList.add('muted'); btn.innerText = "🔇";
+        } else {
+            isAudioPlaying = true; audio.play().catch(e => {});
+            btn.classList.remove('muted'); btn.innerText = "🎵";
+        }
+    }
+
+    function switchPage(pageId) {
+        document.getElementById(currentActivePage).classList.remove('active');
+        document.getElementById(pageId).classList.add('active');
+        currentActivePage = pageId;
+    }
+
+    function validateAndLogin() {
+        const name = document.getElementById('inputName').value.trim();
+        const cls = document.getElementById('selectClass').value;
+        const msg = document.getElementById('validationMsg');
+        if (!name || !cls) {
+            msg.textContent = "⚠️ Mohon isi Nama dan Kelas Anda!"; msg.style.display = "block"; return;
+        }
+        msg.style.display = "none";
+        document.getElementById('studentUserLabel').innerText = name;
+        document.getElementById('studentClassLabel').innerText = cls;
+        switchPage('page-content');
+        handleSubDropdownChange();
+    }
+
+    function scrollToSection(sectionId) {
+        const el = document.getElementById(sectionId);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    const mask = document.getElementById('globalModalMask');
+    const iframe = document.getElementById('modalWebIframe');
+    const internalBox = document.getElementById('modalInternalAssetContent');
+    const titleText = document.getElementById('modalHeaderTitle');
+    const modalWin = document.getElementById('modalWindow');
+
+    function launchWebWindow(url) {
+        titleText.innerText = "Pranala Luar: " + url;
+        internalBox.style.display = "none"; iframe.style.display = "block"; iframe.src = url;
+        mask.style.display = "flex";
+    }
+
+    function launchInternalAsset(assetType, subIndex, subTitle) {
+        titleText.innerText = `${subTitle}`;
+        iframe.style.display = "none"; iframe.src = "";
+        internalBox.style.display = "block"; internalBox.innerHTML = "";
+
+        if(assetType === 7) {
+            iframe.style.display = "block"; internalBox.style.display = "none";
+            iframe.src = `asset/kuis/evaluasi_akhir.html`; mask.style.display = "flex"; return;
+        }
+        if(assetType === 1) {
+            iframe.style.display = "block"; internalBox.style.display = "none";
+            iframe.src = `asset/simulasi/sim_sub_${subIndex}.html`; mask.style.display = "flex"; return;
+        }
+        
+        let contentHtml = "";
+        if(assetType === 2) {
+            contentHtml = `<div class="asset-inner-view"><video controls class="w-full max-h-[72vh] rounded"><source src="asset/video/video_sub_${subIndex}.mp4" type="video/mp4"></video></div>`;
+        } else if(assetType === 3) {
+            contentHtml = `<div class="asset-inner-view"><img src="asset/img/grafik_sub_${subIndex}.png" class="max-w-full max-h-[70vh] object-contain" onerror="this.src='asset/img/materi_default.png'"></div>`;
+        } else if(assetType === 4) {
+            contentHtml = `<div class="asset-inner-view"><img src="asset/img/skema_sub_${subIndex}.png" class="max-w-full max-h-[70vh] object-contain" onerror="this.src='asset/img/materi_default.png'"></div>`;
+        } else if(assetType === 5) {
+            contentHtml = `<div class="asset-inner-view"><img src="asset/img/tabel_sub_${subIndex}.png" class="max-w-full max-h-[70vh] object-contain" onerror="this.src='asset/img/materi_default.png'"></div>`;
+        } else if(assetType === 6) {
+            iframe.style.display = "block"; internalBox.style.display = "none";
+            iframe.src = `asset/kuis/kuis_sub_${subIndex}.html`; mask.style.display = "flex"; return;
+        }
+        internalBox.innerHTML = contentHtml; mask.style.display = "flex";
+    }
+
+    function toggleModalSize() {
+        const btn = document.querySelector('.modal-btn-maximize');
+        if (modalWin.classList.contains('fullscreen')) {
+            modalWin.classList.remove('fullscreen'); btn.innerText = "🗖 Fullscreen";
+        } else {
+            modalWin.classList.add('fullscreen'); btn.innerText = "🗗 Restore";
+        }
+    }
+
+    function closeGlobalModal() {
+        mask.style.display = "none"; iframe.src = "";
+        modalWin.classList.remove('fullscreen');
+    }
+
+    function handleSubDropdownChange() {
+        const dropdown = document.getElementById('selectSubDropdown');
+        const selectedSub = dropdown.value;
+        const selectedText = dropdown.options[dropdown.selectedIndex].text;
+        const grid = document.getElementById('assetGridContainer');
+        grid.innerHTML = "";
+        
+        const icons = ["🧪", "⚗️", "🔬", "📊", "🌡️", "🔍"];
+        const names = ["Simulasi", "Video", "Grafik", "Model Molekul", "Tabel Data", "Kuis Kilat"];
+        
+        for (let k = 0; k < 6; k++) {
+            const card = document.createElement('div');
+            card.className = "asset-card";
+            const title = `${names[k]} - ${selectedText}`; 
+            card.onclick = () => launchInternalAsset(k + 1, parseInt(selectedSub), title);
+            card.innerHTML = `<div class="asset-icon">${icons[k]}</div><div>${title}</div>`;
+            grid.appendChild(card);
+        }
+    }
+
+    function openInfografisLightbox() {
+        const img = document.getElementById("infografisGugusFungsi");
+        const lightbox = document.getElementById("infografisLightbox");
+        const lightboxImg = document.getElementById("imgInfografisTarget");
+        document.getElementById("vidLightboxTarget").classList.add('hidden');
+        document.getElementById("frameLightboxTarget").classList.add('hidden');
+        lightbox.style.display = "flex"; lightboxImg.src = img.src; lightboxImg.classList.remove('hidden');
+    }
+
+    function closeInfografisLightbox() {
+        document.getElementById("infografisLightbox").style.display = "none";
+        const lightboxVid = document.getElementById("vidLightboxTarget");
+        lightboxVid.pause(); lightboxVid.src = "";
+        document.getElementById("frameLightboxTarget").src = "";
+    }
+
+    function showToast(msg) {
+        const existingToast = document.querySelector('.toast');
+        if (existingToast) existingToast.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast'; toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => { if(document.body.contains(toast)) toast.remove(); }, 3000);
+    }
+
+    document.body.addEventListener('click', () => {
+        const audio = document.getElementById('bgMusic');
+        if (!isAudioPlaying) { audio.play().then(() => { isAudioPlaying = true; }).catch(e=>{}); }
+    }, { once: true });
+  </script>
+ </body>
+</html>
